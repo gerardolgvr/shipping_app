@@ -1,7 +1,7 @@
 package dev.gerardo.shippingapp.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import dev.gerardo.shippingapp.domain.PackageType;
-import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,7 +23,7 @@ public class PackageTypeServiceTest {
     PackageTypeService packageTypeService;
 
     @Test
-    public void shouldParseStringResponseToPackageTypesList() throws JSONException {
+    public void shouldParseStringResponseToPackageTypesList() throws JsonProcessingException {
         String dataToParse = "[{\"id\":3,\"description\":\"Envelop\",\"price\":5},{\"id\":4,\"description\":\"Box\",\"price\":10}]";
         List<PackageType> typeList = packageTypeService.parseToPackageTypes(dataToParse);
         assertEquals(2, typeList.size());
@@ -32,7 +32,7 @@ public class PackageTypeServiceTest {
     }
 
     @Test
-    public void shouldObtainAStringListForUI() {
+    public void shouldObtainAStringListForUI() throws JsonProcessingException {
         String dataToParse = "[{\"id\":3,\"description\":\"Envelop\",\"price\":5},{\"id\":4,\"description\":\"Box\",\"price\":10}]";
         List<PackageType> typeList = packageTypeService.parseToPackageTypes(dataToParse);
         assertEquals(2, typeList.size());
@@ -45,7 +45,7 @@ public class PackageTypeServiceTest {
     }
 
     @Test
-    public void shouldGetPackageTypes() {
+    public void shouldGetPackageTypes() throws JsonProcessingException {
         String dataToParse = "[{\"id\":3,\"description\":\"Envelop\",\"price\":5},{\"id\":4,\"description\":\"Box\",\"price\":10}]";
         List<PackageType> typeList = packageTypeService.parseToPackageTypes(dataToParse);
 
@@ -55,15 +55,15 @@ public class PackageTypeServiceTest {
     }
 
     @Test
-    public void shouldDataPersistInMemory() {
+    public void shouldDataPersistInMemory() throws JsonProcessingException {
         String dataToParse = "[{\"id\":3,\"description\":\"Envelop\",\"price\":5},{\"id\":4,\"description\":\"Box\",\"price\":10}]";
         List<PackageType> typeList = packageTypeService.parseToPackageTypes(dataToParse);
 
         packageTypeService.setPackageTypes(typeList);
 
         List<String> uiPackageTypes = packageTypeService.getUiPackageTypes(typeList);
-        assertEquals("Envelop", packageTypeService.getPackageTypes().get(0).getDescription());
-        assertEquals("Box", packageTypeService.getPackageTypes().get(1).getDescription());
+        assertEquals("Envelop", uiPackageTypes.get(0));
+        assertEquals("Box", uiPackageTypes.get(1));
     }
 
 }
