@@ -1,16 +1,16 @@
 package dev.gerardo.shippingapp.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.gerardo.shippingapp.domain.PackageType;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PackageTypeService {
@@ -26,40 +26,22 @@ public class PackageTypeService {
     @Value("${shippingapp.rabbitmq.routingkey}")
     private String routingKey;
 
-    public List<PackageType> requestAndReceive() throws JSONException {
+    public List<PackageType> requestAndReceive() throws JsonProcessingException {
         String request = "{\"type\":\"packageType\"}";
-        boolean noData = true;
-        String response = null;
-
-        while (noData) {
-            response = String.valueOf(rabbitTemplate.convertSendAndReceive(exchange, routingKey, request));
-            noData = (response.equals("null")) ? true : false;
-        }
+        String response = String.valueOf(rabbitTemplate.convertSendAndReceive(exchange, routingKey, request));
 
         packageTypes = parseToPackageTypes(response);
         return packageTypes;
     }
 
     public List<String> getUiPackageTypes(List<PackageType> typesList) {
-        List<String> uiPackageTypes = new LinkedList<>();
-
-        for(int i = 0; i < typesList.size(); i++) {
-            uiPackageTypes.add(typesList.get(i).getDescription());
-        }
-
-        return uiPackageTypes;
+        return typesList.stream().map(PackageType::getDescription).collect(Collectors.toList());
     }
 
-    public List<PackageType> parseToPackageTypes(String json) throws JSONException {
-        JSONArray jsonArray = new JSONArray(json);
-        List<PackageType> types = new LinkedList<>();
-
-        for(int i = 0; i < jsonArray.length(); i++) {
-            JSONObject object = jsonArray.getJSONObject(i);
-            PackageType packageType = new PackageType(Integer.parseInt(String.valueOf(object.get("id"))), String.valueOf(object.get("description")), Float.parseFloat(String.valueOf(object.get("price"))));
-            types.add(packageType);
-        }
-
+    public List<PackageType> parseToPackageTypes(String json) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        List<PackageType> types = mapper.readValue(json, new TypeReference<List<PackageType>>() {
+        });
         return types;
     }
 
@@ -71,3 +53,4 @@ public class PackageTypeService {
         this.packageTypes = packageTypes;
     }
 }
+
