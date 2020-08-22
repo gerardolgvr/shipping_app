@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.gerardo.shippingapp.domain.PackageType;
+import dev.gerardo.shippingapp.exception.UnavailableServiceException;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,7 +30,9 @@ public class PackageTypeService {
     public List<PackageType> requestAndReceive() throws JsonProcessingException {
         String request = "{\"type\":\"packageType\"}";
         String response = String.valueOf(rabbitTemplate.convertSendAndReceive(exchange, routingKey, request));
-
+        if (response.equals("null")) {
+            throw new UnavailableServiceException("Error fetching data");
+        }
         packageTypes = parseToPackageTypes(response);
         return packageTypes;
     }
