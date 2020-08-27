@@ -35,4 +35,10 @@ public class PackageTypeController {
         return new ResponseEntity<>(uiPackageTypes, HttpStatus.OK);
     }
 
+    @CrossOrigin
+    @GetMapping(value = "/home")
+    public ResponseEntity<String> testHome() {
+        return new ResponseEntity<>("Hello", HttpStatus.OK);
+    }
+
 }
