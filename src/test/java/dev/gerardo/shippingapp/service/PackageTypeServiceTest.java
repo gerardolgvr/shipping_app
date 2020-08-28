@@ -1,69 +1,76 @@
 package dev.gerardo.shippingapp.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.gerardo.shippingapp.config.RabbitMQConfigProperties;
 import dev.gerardo.shippingapp.domain.PackageType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.core.AmqpTemplate;
 
+import java.util.LinkedList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class PackageTypeServiceTest {
 
-    @Mock
-    private AmqpTemplate rabbitTemplate;
-
     @InjectMocks
     PackageTypeService packageTypeService;
-
-    @Test
-    public void shouldParseStringResponseToPackageTypesList() throws JsonProcessingException {
-        String dataToParse = "[{\"id\":3,\"description\":\"Envelop\",\"price\":5},{\"id\":4,\"description\":\"Box\",\"price\":10}]";
-        List<PackageType> typeList = packageTypeService.parseToPackageTypes(dataToParse);
-        assertEquals(2, typeList.size());
-        assertEquals("Envelop", typeList.get(0).getDescription());
-        assertEquals("Box", typeList.get(1).getDescription());
-    }
-
-    @Test
-    public void shouldObtainAStringListForUI() throws JsonProcessingException {
-        String dataToParse = "[{\"id\":3,\"description\":\"Envelop\",\"price\":5},{\"id\":4,\"description\":\"Box\",\"price\":10}]";
-        List<PackageType> typeList = packageTypeService.parseToPackageTypes(dataToParse);
-        assertEquals(2, typeList.size());
-        assertEquals("Envelop", typeList.get(0).getDescription());
-        assertEquals("Box", typeList.get(1).getDescription());
-
-        List<String> uiPackageTypes = packageTypeService.getUiPackageTypes(typeList);
-        assertEquals("Envelop", uiPackageTypes.get(0));
-        assertEquals("Box", uiPackageTypes.get(1));
-    }
+    @Mock
+    private AmqpTemplate rabbitTemplate;
+    @Mock
+    private RabbitMQConfigProperties rabbitMQConfigProperties;
+    @Mock
+    private ObjectMapper objectMapper;
 
     @Test
     public void shouldGetPackageTypes() throws JsonProcessingException {
-        String dataToParse = "[{\"id\":3,\"description\":\"Envelop\",\"price\":5},{\"id\":4,\"description\":\"Box\",\"price\":10}]";
-        List<PackageType> typeList = packageTypeService.parseToPackageTypes(dataToParse);
+        // Given:
+        String json = "[{\"id\":3,\"description\":\"Envelop\",\"price\":5},{\"id\":4,\"description\":\"Box\",\"price\":10}]";
+        String request = "{\"type\":\"packageType\"}";
+        when(rabbitTemplate.convertSendAndReceive(
+                rabbitMQConfigProperties.getExchange(),
+                rabbitMQConfigProperties.getRoutingKey(),
+                request)).thenReturn(json);
+        List<PackageType> packageTypesList = new LinkedList<>();
+        packageTypesList.add(new PackageType(3, "Envelop", 5f));
+        packageTypesList.add(new PackageType(4, "Box", 10f));
+        when(objectMapper.readValue(eq(json), Mockito.<TypeReference<List<PackageType>>>any())).thenReturn(packageTypesList);
 
-        packageTypeService.setPackageTypes(typeList);
+        // When:
+        List<PackageType> packageTypes = packageTypeService.getPackageTypes();
 
-        assertEquals(typeList.size(), packageTypeService.getPackageTypes().size());
+        // Then:
+        assertThat(packageTypes.get(0).getId()).isEqualTo(3);
+        assertThat(packageTypes.get(0).getDescription()).isEqualTo("Envelop");
+        assertThat(packageTypes.get(1).getId()).isEqualTo(4);
+        assertThat(packageTypes.get(1).getDescription()).isEqualTo("Box");
     }
 
     @Test
-    public void shouldDataPersistInMemory() throws JsonProcessingException {
-        String dataToParse = "[{\"id\":3,\"description\":\"Envelop\",\"price\":5},{\"id\":4,\"description\":\"Box\",\"price\":10}]";
-        List<PackageType> typeList = packageTypeService.parseToPackageTypes(dataToParse);
+    public void shouldParseJsonToPackageTypes() throws JsonProcessingException {
+        // Given:
+        List<PackageType> packageTypesList = new LinkedList<>();
+        packageTypesList.add(new PackageType(3, "Envelop", 5f));
+        packageTypesList.add(new PackageType(4, "Box", 10f));
+        String json = "[{\"id\":3,\"description\":\"Envelop\",\"price\":5},{\"id\":4,\"description\":\"Box\",\"price\":10}]";
+        when(objectMapper.readValue(eq(json), Mockito.<TypeReference<List<PackageType>>>any())).thenReturn(packageTypesList);
 
-        packageTypeService.setPackageTypes(typeList);
+        // When:
+        List<PackageType> packageTypes = packageTypeService.parseToPackageTypes(json);
 
-        List<String> uiPackageTypes = packageTypeService.getUiPackageTypes(typeList);
-        assertEquals("Envelop", uiPackageTypes.get(0));
-        assertEquals("Box", uiPackageTypes.get(1));
+        // Then:
+        assertThat(packageTypesList.get(0).getDescription()).isEqualTo("Envelop");
+        assertThat(packageTypesList.get(1).getDescription()).isEqualTo("Box");
     }
 
 }

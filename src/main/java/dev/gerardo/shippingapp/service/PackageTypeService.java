@@ -3,57 +3,52 @@ package dev.gerardo.shippingapp.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.gerardo.shippingapp.config.RabbitMQConfigProperties;
 import dev.gerardo.shippingapp.domain.PackageType;
 import dev.gerardo.shippingapp.exception.UnavailableServiceException;
 import org.springframework.amqp.core.AmqpTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class PackageTypeService {
 
-    private List<PackageType> packageTypes;
+    private final AmqpTemplate rabbitTemplate;
+    private final RabbitMQConfigProperties rabbitMQConfigProperties;
+    private final ObjectMapper mapper;
 
-    @Autowired
-    private AmqpTemplate rabbitTemplate;
-
-    @Value("${shippingapp.rabbitmq.exchange}")
-    private String exchange;
-
-    @Value("${shippingapp.rabbitmq.routingkey}")
-    private String routingKey;
-
-    public List<PackageType> requestAndReceive() throws JsonProcessingException {
-        String request = "{\"type\":\"packageType\"}";
-        String response = String.valueOf(rabbitTemplate.convertSendAndReceive(exchange, routingKey, request));
-        if (response.equals("null")) {
-            throw new UnavailableServiceException("Error fetching data");
-        }
-        packageTypes = parseToPackageTypes(response);
-        return packageTypes;
-    }
-
-    public List<String> getUiPackageTypes(List<PackageType> typesList) {
-        return typesList.stream().map(PackageType::getDescription).collect(Collectors.toList());
-    }
-
-    public List<PackageType> parseToPackageTypes(String json) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        List<PackageType> types = mapper.readValue(json, new TypeReference<List<PackageType>>() {
-        });
-        return types;
+    public PackageTypeService(AmqpTemplate rabbitTemplate,
+                              RabbitMQConfigProperties rabbitMQConfigProperties,
+                              ObjectMapper mapper) {
+        this.rabbitTemplate = rabbitTemplate;
+        this.rabbitMQConfigProperties = rabbitMQConfigProperties;
+        this.mapper = mapper;
     }
 
     public List<PackageType> getPackageTypes() {
-        return packageTypes;
+        List<PackageType> packageTypesList = new LinkedList<>();
+        try {
+            String request = "{\"type\":\"packageType\"}";
+            String response = String.valueOf(rabbitTemplate.convertSendAndReceive(rabbitMQConfigProperties.getExchange(),
+                    rabbitMQConfigProperties.getRoutingKey(),
+                    request));
+
+            if (response.equals("null")) {
+                throw new UnavailableServiceException("Error fetching data");
+            }
+            packageTypesList = parseToPackageTypes(response);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return packageTypesList;
     }
 
-    public void setPackageTypes(List<PackageType> packageTypes) {
-        this.packageTypes = packageTypes;
+    public List<PackageType> parseToPackageTypes(String json) throws JsonProcessingException {
+        return mapper.readValue(json, new TypeReference<List<PackageType>>() {
+        });
     }
+
 }
 
