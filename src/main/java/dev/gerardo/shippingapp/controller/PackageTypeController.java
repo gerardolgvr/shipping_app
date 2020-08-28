@@ -1,9 +1,11 @@
 package dev.gerardo.shippingapp.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import dev.gerardo.shippingapp.domain.PackageType;
 import dev.gerardo.shippingapp.exception.UnavailableServiceException;
 import dev.gerardo.shippingapp.service.PackageTypeService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -17,8 +19,12 @@ import java.util.stream.Collectors;
 @RestController
 public class PackageTypeController {
 
-    @Autowired
-    PackageTypeService packageTypeService;
+    private static final Logger logger = LoggerFactory.getLogger(PackageTypeService.class);
+    private PackageTypeService packageTypeService;
+
+    public PackageTypeController(PackageTypeService packageTypeService) {
+        this.packageTypeService = packageTypeService;
+    }
 
     @CrossOrigin
     @GetMapping(value = "/type")
@@ -28,7 +34,8 @@ public class PackageTypeController {
         try {
             types = packageTypeService.getPackageTypes();
             uiPackageTypes = types.stream().map(PackageType::getDescription).collect(Collectors.toList());
-        } catch (UnavailableServiceException exc) {
+        } catch (UnavailableServiceException | JsonProcessingException exc) {
+            logger.error("An error occured fetching data");
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "Error fetching data", exc);
         }

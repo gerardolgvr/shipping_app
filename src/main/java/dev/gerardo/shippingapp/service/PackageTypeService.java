@@ -6,14 +6,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.gerardo.shippingapp.config.RabbitMQConfigProperties;
 import dev.gerardo.shippingapp.domain.PackageType;
 import dev.gerardo.shippingapp.exception.UnavailableServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedList;
 import java.util.List;
 
 @Service
 public class PackageTypeService {
+
+    private static final Logger logger = LoggerFactory.getLogger(PackageTypeService.class);
 
     private final AmqpTemplate rabbitTemplate;
     private final RabbitMQConfigProperties rabbitMQConfigProperties;
@@ -27,22 +30,17 @@ public class PackageTypeService {
         this.mapper = mapper;
     }
 
-    public List<PackageType> getPackageTypes() {
-        List<PackageType> packageTypesList = new LinkedList<>();
-        try {
-            String request = "{\"type\":\"packageType\"}";
-            String response = String.valueOf(rabbitTemplate.convertSendAndReceive(rabbitMQConfigProperties.getExchange(),
-                    rabbitMQConfigProperties.getRoutingKey(),
-                    request));
+    public List<PackageType> getPackageTypes() throws JsonProcessingException {
+        String request = "{\"type\":\"packageType\"}";
+        String response = String.valueOf(rabbitTemplate.convertSendAndReceive(rabbitMQConfigProperties.getExchange(),
+                rabbitMQConfigProperties.getRoutingKey(),
+                request));
 
-            if (response.equals("null")) {
-                throw new UnavailableServiceException("Error fetching data");
-            }
-            packageTypesList = parseToPackageTypes(response);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+        if (response.equals("null")) {
+            logger.error("An error ocurred trying to parse: {}", response);
+            throw new UnavailableServiceException("Error fetching data");
         }
-        return packageTypesList;
+        return parseToPackageTypes(response);
     }
 
     public List<PackageType> parseToPackageTypes(String json) throws JsonProcessingException {
