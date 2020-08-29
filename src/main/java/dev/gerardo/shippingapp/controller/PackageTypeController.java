@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @RestController
 public class PackageTypeController {
 
-    private static final Logger logger = LoggerFactory.getLogger(PackageTypeService.class);
+    private static final Logger logger = LoggerFactory.getLogger(PackageTypeController.class);
     private PackageTypeService packageTypeService;
 
     public PackageTypeController(PackageTypeService packageTypeService) {
