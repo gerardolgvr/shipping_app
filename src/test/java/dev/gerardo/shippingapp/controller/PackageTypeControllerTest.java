@@ -3,6 +3,7 @@ package dev.gerardo.shippingapp.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.gerardo.shippingapp.domain.PackageType;
+import dev.gerardo.shippingapp.exception.UnavailableServiceException;
 import dev.gerardo.shippingapp.service.PackageTypeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +70,21 @@ public class PackageTypeControllerTest {
         assertThat(types).isEmpty();
         verify(packageTypeService).getPackageTypes();
         verifyNoMoreInteractions(packageTypeService);
+    }
+
+    @Test
+    public void testTypeEndpointWhenServiceIsUnvailable() throws Exception {
+        // Given:
+        when(packageTypeService.getPackageTypes()).thenThrow(new UnavailableServiceException("Error fetching data"));
+
+        // When:
+        MockHttpServletResponse response = mockMvc.perform(get("/type"))
+                .andReturn().getResponse();
+
+        // Then:
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        assertThat(response.getErrorMessage()).isEqualTo("Error fetching data");
+
     }
 
 }

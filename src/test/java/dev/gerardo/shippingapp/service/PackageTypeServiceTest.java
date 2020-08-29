@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.gerardo.shippingapp.config.RabbitMQConfigProperties;
 import dev.gerardo.shippingapp.domain.PackageType;
+import dev.gerardo.shippingapp.exception.UnavailableServiceException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,6 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -71,6 +73,27 @@ public class PackageTypeServiceTest {
         // Then:
         assertThat(packageTypesList.get(0).getDescription()).isEqualTo("Envelop");
         assertThat(packageTypesList.get(1).getDescription()).isEqualTo("Box");
+    }
+
+    @Test
+    public void testServiceWhenDataIsNotAvailable() {
+        // Given:
+        String json = "null";
+        String request = "{\"type\":\"packageType\"}";
+        when(rabbitTemplate.convertSendAndReceive(
+                rabbitMQConfigProperties.getExchange(),
+                rabbitMQConfigProperties.getRoutingKey(),
+                request)).thenReturn(json);
+
+        // When:
+        Throwable thrown = catchThrowable(() -> {
+            List<PackageType> packageTypes = packageTypeService.getPackageTypes();
+        });
+
+        // Then:
+        assertThat(thrown)
+                .isInstanceOf(UnavailableServiceException.class)
+                .hasMessage("Error fetching data");
     }
 
 }
