@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PackageTypeService {
@@ -28,13 +29,13 @@ public class PackageTypeService {
     }
 
     public List<PackageType> getPackageTypes() throws JsonProcessingException {
-        String response = String.valueOf(rabbitData.getData(RabbitMQConstants.PACKAGE_TYPE_REQUEST));
+        Optional<Object> response = rabbitData.getData(RabbitMQConstants.PACKAGE_TYPE_REQUEST);
 
-        if (response.equals("null")) {
+        if (response.isEmpty()) {
             logger.error("An error ocurred trying to parse: {}", response);
             throw new UnavailableServiceException("Error fetching data");
         }
-        return parseToPackageTypes(response);
+        return parseToPackageTypes(response.get().toString());
     }
 
     public List<PackageType> parseToPackageTypes(String json) throws JsonProcessingException {

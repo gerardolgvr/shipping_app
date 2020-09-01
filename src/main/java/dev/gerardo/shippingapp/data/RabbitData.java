@@ -4,6 +4,8 @@ import dev.gerardo.shippingapp.config.RabbitMQConfigProperties;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 public class RabbitData {
 
@@ -15,9 +17,9 @@ public class RabbitData {
         this.rabbitMQConfigProperties = rabbitMQConfigProperties;
     }
 
-    public Object getData(String request){
-        return rabbitTemplate.convertSendAndReceive(rabbitMQConfigProperties.getExchange(),
+    public Optional<Object> getData(String request){
+        return Optional.ofNullable(rabbitTemplate.convertSendAndReceive(rabbitMQConfigProperties.getExchange(),
                 rabbitMQConfigProperties.getRoutingKey(),
-                request);
+                request));
     }
 }
