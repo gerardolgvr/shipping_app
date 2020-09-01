@@ -14,6 +14,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -27,6 +28,9 @@ public class PackageTypeControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper mapper;
 
     @MockBean
     private PackageTypeService packageTypeService;
@@ -45,9 +49,7 @@ public class PackageTypeControllerTest {
 
         // Then:
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-        ObjectMapper mapper = new ObjectMapper();
-        List<String> types = mapper.readValue(response.getContentAsString(), new TypeReference<List<String>>() {
-        });
+        List<String> types = Arrays.asList(mapper.readValue(response.getContentAsString(), String[].class));
         assertThat(types).contains("Envelop", "Box");
 
     }
@@ -64,9 +66,7 @@ public class PackageTypeControllerTest {
 
         // Then:
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-        ObjectMapper mapper = new ObjectMapper();
-        List<String> types = mapper.readValue(response.getContentAsString(), new TypeReference<List<String>>() {
-        });
+        List<String> types = Arrays.asList(mapper.readValue(response.getContentAsString(), String[].class));
         assertThat(types).isEmpty();
         verify(packageTypeService).getPackageTypes();
         verifyNoMoreInteractions(packageTypeService);

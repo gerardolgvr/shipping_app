@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@CrossOrigin
 @RestController
 public class PackageTypeController {
 
@@ -26,7 +27,6 @@ public class PackageTypeController {
         this.packageTypeService = packageTypeService;
     }
 
-    @CrossOrigin
     @GetMapping(value = "/type")
     public ResponseEntity<?> getPackageTypes() {
         List<PackageType> types;
