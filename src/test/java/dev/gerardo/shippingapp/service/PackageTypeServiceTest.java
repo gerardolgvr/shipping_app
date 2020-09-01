@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -37,7 +38,7 @@ public class PackageTypeServiceTest {
 
         // Given:
         String json = "[{\"id\":3,\"description\":\"Envelop\",\"price\":5},{\"id\":4,\"description\":\"Box\",\"price\":10}]";
-        when(rabbitData.getData(RabbitMQConstants.PACKAGE_TYPE_REQUEST)).thenReturn(json);
+        when(rabbitData.getData(RabbitMQConstants.PACKAGE_TYPE_REQUEST)).thenReturn(Optional.of(json));
         PackageType[] packageTypesList = new PackageType[]{
                 new PackageType(3, "Envelop", 5f),
                 new PackageType(4, "Box", 10f)
@@ -79,8 +80,8 @@ public class PackageTypeServiceTest {
     public void testServiceWhenDataIsNotAvailable() {
 
         // Given:
-        String json = "null";
-        when(rabbitData.getData(RabbitMQConstants.PACKAGE_TYPE_REQUEST)).thenReturn(json);
+        String json = null;
+        when(rabbitData.getData(RabbitMQConstants.PACKAGE_TYPE_REQUEST)).thenReturn(Optional.ofNullable(json));
 
         // When:
         Throwable thrown = catchThrowable(() -> {

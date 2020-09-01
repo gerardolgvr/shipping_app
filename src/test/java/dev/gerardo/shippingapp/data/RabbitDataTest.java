@@ -14,6 +14,7 @@ import org.springframework.amqp.core.AmqpTemplate;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -49,7 +50,7 @@ public class RabbitDataTest {
         when(mapper.readValue(eq(json), eq(PackageType[].class))).thenReturn(packageTypesList);
 
         // When:
-        String response = String.valueOf(rabbitData.getData(RabbitMQConstants.PACKAGE_TYPE_REQUEST));
+        String response = rabbitData.getData(RabbitMQConstants.PACKAGE_TYPE_REQUEST).get().toString();
         List<PackageType> expectedPackageTypeList = Arrays.asList(mapper.readValue(response, PackageType[].class));
 
         // Then:
