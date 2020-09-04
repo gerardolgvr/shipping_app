@@ -50,12 +50,12 @@ public class PackageSizeServiceTest {
         when(objectMapper.readValue(eq(json), eq(PackageSize[].class))).thenReturn(packageSizesList);
 
         // When:
-        List<PackageSize> packageSizes = packageSizeService.getPackageSizes();
+        List<String> packageSizes = packageSizeService.getPackageSizes();
 
         // Then:
-        assertThat(packageSizes.get(0)).isEqualTo(packageSizesList[0]);
-        assertThat(packageSizes.get(1)).isEqualTo(packageSizesList[1]);
-        assertThat(packageSizes.get(2)).isEqualTo(packageSizesList[2]);
+        assertThat(packageSizes.get(0)).isEqualTo("Small");
+        assertThat(packageSizes.get(1)).isEqualTo("Medium");
+        assertThat(packageSizes.get(2)).isEqualTo("Large");
 
     }
 
@@ -90,7 +90,7 @@ public class PackageSizeServiceTest {
 
         // When:
         Throwable thrown = catchThrowable(() -> {
-            List<PackageSize> packageSizes = packageSizeService.getPackageSizes();
+            List<String> packageSizes = packageSizeService.getPackageSizes();
         });
 
         // Then:

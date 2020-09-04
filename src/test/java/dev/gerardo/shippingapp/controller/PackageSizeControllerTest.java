@@ -38,20 +38,20 @@ public class PackageSizeControllerTest {
     public void testPackageSizeEndpoint() throws Exception {
 
         // Given:
-        List<PackageSize> packageSizeList = new LinkedList<>();
-        packageSizeList.add(new PackageSize(4, "Small", 10f));
-        packageSizeList.add(new PackageSize(5, "Medium", 25f));
-        packageSizeList.add(new PackageSize(6, "Large", 50f));
+        List<String> packageSizeList = new LinkedList<>();
+        packageSizeList.add("Small");
+        packageSizeList.add("Medium");
+        packageSizeList.add("Large");
         when(packageSizeService.getPackageSizes()).thenReturn(packageSizeList);
 
         // When:
-        MockHttpServletResponse response = mockMvc.perform(get("/size/Medium"))
+        MockHttpServletResponse response = mockMvc.perform(get("/size/Envelop"))
                 .andReturn().getResponse();
 
         // Then:
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         List<String> packageSizes = Arrays.asList(mapper.readValue(response.getContentAsString(), String[].class));
-        assertThat(packageSizes).contains("Small", "Medium", "Large");
+        assertThat(packageSizes).isEqualTo(packageSizeList);
 
     }
 
@@ -59,11 +59,11 @@ public class PackageSizeControllerTest {
     public void testPackageSizeEndpointWithEmptyResults() throws Exception {
 
         // Given:
-        List<PackageSize> packageSizeList = new LinkedList<>();
+        List<String> packageSizeList = new LinkedList<>();
         when(packageSizeService.getPackageSizes()).thenReturn(packageSizeList);
 
         // When:
-        MockHttpServletResponse response = mockMvc.perform(get("/size/Medium"))
+        MockHttpServletResponse response = mockMvc.perform(get("/size/Envelop"))
                 .andReturn().getResponse();
 
         // Then:
@@ -82,7 +82,7 @@ public class PackageSizeControllerTest {
         when(packageSizeService.getPackageSizes()).thenThrow(new UnavailableServiceException("Error fetching data"));
 
         // When:
-        MockHttpServletResponse response = mockMvc.perform(get("/size/Medium"))
+        MockHttpServletResponse response = mockMvc.perform(get("/size/Envelop"))
                 .andReturn().getResponse();
 
         // Then:
