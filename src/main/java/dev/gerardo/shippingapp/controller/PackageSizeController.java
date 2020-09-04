@@ -1,7 +1,6 @@
 package dev.gerardo.shippingapp.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import dev.gerardo.shippingapp.domain.PackageSize;
 import dev.gerardo.shippingapp.exception.UnavailableServiceException;
 import dev.gerardo.shippingapp.service.PackageSizeService;
 import org.slf4j.Logger;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 public class PackageSizeController {
@@ -29,11 +27,9 @@ public class PackageSizeController {
 
     @GetMapping(value = "/size/{type}")
     public ResponseEntity<?> getPackageSizes(@PathVariable(value = "type") String type) {
-        List<PackageSize> sizes;
         List<String> uiPackageSizes;
         try {
-            sizes = packageSizeService.getPackageSizes();
-            uiPackageSizes = sizes.stream().map(PackageSize::getDescription).collect(Collectors.toList());
+            uiPackageSizes = packageSizeService.getPackageSizes();
         } catch (UnavailableServiceException | JsonProcessingException exc) {
             logger.error("An error occured fetching package size data");
             throw new ResponseStatusException(

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PackageSizeService {
@@ -28,14 +29,15 @@ public class PackageSizeService {
         this.mapper = mapper;
     }
 
-    public List<PackageSize> getPackageSizes() throws JsonProcessingException {
+    public List<String> getPackageSizes() throws JsonProcessingException {
         Optional<Object> response = rabbitData.getData(RabbitMQConstants.PACKAGE_SIZE_REQUEST);
 
         if (response.isEmpty()) {
             logger.error("An error ocurred trying to parse package sizes: {}", response);
             throw new UnavailableServiceException("Error fetching data");
         }
-        return parseToPackageSizes(response.get().toString());
+        List<PackageSize> packageSizeList = parseToPackageSizes(response.get().toString());
+        return packageSizeList.stream().map(PackageSize::getDescription).collect(Collectors.toList());
     }
 
     public List<PackageSize> parseToPackageSizes(String json) throws JsonProcessingException {
