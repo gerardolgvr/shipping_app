@@ -36,11 +36,12 @@ public class PackageSizeServiceTest {
     @InjectMocks
     private PackageSizeService packageSizeService;
 
+    private final String json = "[{\"id\":4,\"description\":\"Small\",\"priceFactor\":10},{\"id\":5,\"description\":\"Medium\",\"priceFactor\":25},{\"id\":6,\"description\":\"Large\",\"priceFactor\":50}]";
+
     @Test
     public void shouldGetPackageSizes() throws JsonProcessingException {
 
         // Given:
-        String json = "[{\"id\":4,\"description\":\"Small\",\"priceFactor\":10},{\"id\":5,\"description\":\"Medium\",\"priceFactor\":25},{\"id\":6,\"description\":\"Large\",\"priceFactor\":50}]";
         when(rabbitData.getData(RabbitMQConstants.PACKAGE_SIZE_REQUEST)).thenReturn(Optional.of(json));
         PackageSize[] packageSizesList = new PackageSize[]{
                 new PackageSize(4, "Small", 10f),
@@ -68,7 +69,6 @@ public class PackageSizeServiceTest {
                 new PackageSize(5, "Medium", 25f),
                 new PackageSize(6, "Large", 50f)
         };
-        String json = "[{\"id\":4,\"description\":\"Small\",\"priceFactor\":10},{\"id\":5,\"description\":\"Medium\",\"priceFactor\":25},{\"id\":6,\"description\":\"Large\",\"priceFactor\":50}]";
         when(objectMapper.readValue(eq(json), eq(PackageSize[].class))).thenReturn(packageSizesList);
 
         // When:
