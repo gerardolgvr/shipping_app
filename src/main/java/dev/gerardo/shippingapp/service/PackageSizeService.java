@@ -33,7 +33,7 @@ public class PackageSizeService {
         Optional<Object> response = rabbitData.getData(RabbitMQConstants.PACKAGE_SIZE_REQUEST);
 
         if (response.isEmpty()) {
-            logger.error("An error ocurred trying to parse package sizes: {}", response);
+            logger.error("An error ocurred trying to parse package sizes");
             throw new UnavailableServiceException("Error fetching data");
         }
         List<PackageSize> packageSizeList = parseToPackageSizes(response.get().toString());
