@@ -6,5 +6,6 @@ import org.springframework.stereotype.Component;
 public class RabbitMQConstants {
 
     public static final String PACKAGE_TYPE_REQUEST = "{\"type\":\"packageType\"}";
+    public static final String PACKAGE_SIZE_REQUEST = "{\"type\":\"packageSize\"}";
 
 }
