@@ -1,7 +1,6 @@
 package dev.gerardo.shippingapp.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import dev.gerardo.shippingapp.domain.TransportType;
 import dev.gerardo.shippingapp.exception.UnavailableServiceException;
 import dev.gerardo.shippingapp.service.TransportTypeService;
 import org.slf4j.Logger;
