@@ -28,7 +28,7 @@ public class TransportTypeService {
         this.mapper = mapper;
     }
 
-    public List<String> getTransportTyepes() throws JsonProcessingException {
+    public List<String> getTransportTypes() throws JsonProcessingException {
         Optional<Object> response = rabbitData.getData(RabbitMQConstants.TRANSPORT_TYPE_REQUEST);
 
         if (response.isEmpty()) {
