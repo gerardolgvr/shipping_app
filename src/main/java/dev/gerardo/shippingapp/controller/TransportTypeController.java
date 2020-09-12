@@ -29,7 +29,7 @@ public class TransportTypeController {
     public ResponseEntity<?> getTransportTypes(@PathVariable(value = "size") String size) {
         List<String> uiTransportTypes;
         try {
-            uiTransportTypes = transportTypeService.getTransportTyepes();
+            uiTransportTypes = transportTypeService.getTransportTypes();
         } catch (UnavailableServiceException | JsonProcessingException exc) {
             logger.error("An error occured fetching transport types data");
             throw new ResponseStatusException(
