@@ -7,5 +7,6 @@ public class RabbitMQConstants {
 
     public static final String PACKAGE_TYPE_REQUEST = "{\"type\":\"packageType\"}";
     public static final String PACKAGE_SIZE_REQUEST = "{\"type\":\"packageSize\"}";
+    public static final String TRANSPORT_TYPE_REQUEST = "{\"type\":\"transportType\"}";
 
 }
