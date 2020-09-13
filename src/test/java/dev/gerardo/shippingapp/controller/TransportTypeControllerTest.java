@@ -12,8 +12,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,7 +37,7 @@ public class TransportTypeControllerTest {
     public void testTransportTypeEndpoint() throws Exception {
 
         // Given:
-        List<String> transportTypesList = new LinkedList<>();
+        List<String> transportTypesList = new ArrayList<>();
         transportTypesList.add("Land");
         transportTypesList.add("Air");
         when(transportTypeService.getTransportTypes()).thenReturn(transportTypesList);
@@ -57,7 +57,7 @@ public class TransportTypeControllerTest {
     public void testTransportTypeEndpointWithEmptyResults() throws Exception {
 
         // Given:
-        List<String> transportTypesList = new LinkedList<>();
+        List<String> transportTypesList = new ArrayList<>();
         when(transportTypeService.getTransportTypes()).thenReturn(transportTypesList);
 
         // When:

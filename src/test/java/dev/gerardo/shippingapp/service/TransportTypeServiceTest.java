@@ -13,8 +13,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -43,18 +45,18 @@ public class TransportTypeServiceTest {
 
         // Given:
         when(rabbitData.getData(RabbitMQConstants.TRANSPORT_TYPE_REQUEST)).thenReturn(Optional.of(json));
-        TransportType[] transportTypesList = new TransportType[]{
-                new TransportType(3, "Land", 2),
-                new TransportType(4, "Air", 3)
-        };
+        TransportType[] transportTypesList = TransportTypeServiceTest.getTransportTypes();
         when(objectMapper.readValue(eq(json), eq(TransportType[].class))).thenReturn(transportTypesList);
 
         // When:
         List<String> transportTypes = transportTypeService.getTransportTypes();
 
         // Then:
-        assertThat(transportTypes.get(0)).isEqualTo("Land");
-        assertThat(transportTypes.get(1)).isEqualTo("Air");
+        List<String> expectedTransportTypes = Arrays.asList(transportTypesList)
+                .stream()
+                .map(TransportType::getDescription)
+                .collect(Collectors.toList());
+        assertThat(transportTypes).isEqualTo(expectedTransportTypes);
 
     }
 
@@ -62,10 +64,7 @@ public class TransportTypeServiceTest {
     public void shouldParseJsonToTransportTypes() throws JsonProcessingException {
 
         // Given:
-        TransportType[] transportTypesList = new TransportType[]{
-                new TransportType(3, "Land", 2),
-                new TransportType(4, "Air", 3)
-        };
+        TransportType[] transportTypesList = TransportTypeServiceTest.getTransportTypes();
         when(objectMapper.readValue(eq(json), eq(TransportType[].class))).thenReturn(transportTypesList);
 
         // When:
@@ -94,5 +93,13 @@ public class TransportTypeServiceTest {
                 .isInstanceOf(UnavailableServiceException.class)
                 .hasMessage("Error fetching data");
 
+    }
+
+    private static TransportType[]  getTransportTypes() {
+        TransportType[] transportTypesList = new TransportType[]{
+                new TransportType(3, "Land", 2),
+                new TransportType(4, "Air", 3)
+        };
+        return transportTypesList;
     }
 }
